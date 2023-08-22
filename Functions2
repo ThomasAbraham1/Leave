@@ -1,0 +1,32 @@
+<?php
+// Include the database connection file
+include('Includes/db_connection.php');
+
+if (isset($_POST['Function'])) {
+    $function = $_POST['Function'];
+    switch ($function) {
+        case "PrincipalApproveLeaveAlt":
+            if (isset($_POST['LeaveAlt']) && isset($_POST['LeaveVal'])) {
+                PrincipalApproveLeaveAlt($_POST['LeaveAlt'], $_POST['LeaveVal']);
+            }
+            break;
+        // Add more cases for other functions if needed
+    }
+}
+
+function PrincipalApproveLeaveAlt($leaveAlt, $leaveVal)
+{
+    global $conn;
+
+    // Perform the necessary database update to set Principal approval status
+    $sql = "UPDATE erp_leave_alt SET principal_approval = $leaveVal WHERE la_id = $leaveAlt";
+
+    if (mysqli_query($conn, $sql)) {
+        echo "OK";
+    } else {
+        echo "Error updating database: " . mysqli_error($conn);
+    }
+}
+
+mysqli_close($conn);
+?>
