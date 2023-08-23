@@ -29,14 +29,155 @@ while ($row = mysqli_fetch_assoc($result)) {
     array_push($EventRows, $row);
 }
 
-//for the class dropdown
-$sql = 'SELECT * FROM erp_class';
-$result = mysqli_query($conn, $sql);
-$EventRows1 = array();
-while ($row = mysqli_fetch_assoc($result)) {
-    array_push($EventRows1, $row);
+
+
+
+
+
+// Code from trial.php
+// Getting subjects of faculty
+$subjects = [];
+$cse_classids = [];
+$periods = [];
+$sql = "SELECT f_id, tt_subcode FROM erp_subject WHERE f_id = 'f002'";
+$result = $conn->query($sql);
+
+
+// Check if any rows were returned
+if ($result->num_rows > 0) {
+    
+    // Output the table header
+    echo "<table border=1><tr><th>f_id</th><th>tt_subcode</th></tr>";
+    // Output the table rows
+     $i =0;
+    foreach ($result as $row) {
+       
+        echo "<tr><td>" . $row["f_id"] . "</td><td>" . $row["tt_subcode"] . "</td></tr>";
+        $subjects[$i] = $row['tt_subcode']; 
+        $i++;
+      }
+    // Output the table footer
+    echo "</table>";
+} else {
+    echo "0 results";
 }
 
+$query = "SELECT tt_day, tt_period, tt_subcode FROM erp_timetable WHERE tt_day='Mon' AND (";
+foreach ($subjects as $subject) {
+  $q = $query . "tt_subcode='$subject' OR ";
+  $query = $q;
+}
+$query = rtrim($query, " OR "); // Remove the last " OR "
+$query .= ")";
+
+echo $query;
+// Execute the query and fetch the results
+$result = $conn->query($query);
+
+// Check if any rows were returned
+if ($result->num_rows > 0) {
+
+    $i=0;
+    // Output the table header
+    echo "<table border=1><tr><th>Day</th><th>Subject</th><th>Period</th></tr>";
+    // Output the table rows
+    $i=0;
+    while ($row = $result->fetch_assoc()) {
+      $todaySubjects[$i] = $row['tt_subcode'];
+      echo "<tr><td>" . $row["tt_day"] . "</td><td>" . $row["tt_subcode"] . "</td><td>" . $row["tt_period"] . "</td></tr>";
+      echo 'hello';
+      $periods[$i] = $row['tt_period'];
+      $i++;
+    }
+    $todaySubjects = array_unique($todaySubjects);
+    echo $todaySubjects[1];
+    // Output the table footer
+    echo "</table>";
+  
+  } else {
+    echo "0 results";
+  }
+  
+
+$sql = "SELECT DISTINCT cls_deptname, cls_id FROM erp_class WHERE cls_deptname ='Computer Science And Engineering' ";
+$result = $conn->query($sql);
+if($result->num_rows >0){
+  $i = 0;
+  while ($row = $result->fetch_assoc()) {
+    $cse_classids[$i] = $row['cls_id'];
+  $i++;
+  }
+}
+
+foreach ($periods as $period) {
+// Build the query string
+// $query = "SELECT * FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode WHERE tt_day='Mon' AND tt_period NOT IN (";
+// foreach ($periods as $period) {
+//   $query .= "$period, ";
+// }
+
+$query = "SELECT * FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode INNER JOIN erp_faculty ON erp_subject.f_id=erp_faculty.f_id WHERE tt_day='Mon' AND tt_period NOT IN ($period) AND erp_subject.f_id NOT IN ('f002') AND erp_subject.cls_id IN (";
+// $query = rtrim($query, ", "); // Remove the last comma and space
+
+// $query .= ")";
+foreach ($cse_classids as $classid) {
+  $query .= "$classid, ";
+}
+$query = rtrim($query, ", "); 
+$query .= ")";
+// Execute the query and fetch the results
+$result = $conn->query($query);
+
+// Check if any rows were returned
+if ($result->num_rows > 0) {
+  // Output the table header
+  echo '<h3>'. $period . '</h3>';
+  echo "<table border=1><tr><th>Fid</th><th>Fname</th><th>Day</th><th>Available alternatives</th></tr>";
+  // Output the table rows
+  while ($row = $result->fetch_assoc()) {
+    echo "<tr><td>" . $row["f_id"] . "</td><td>" . $row["f_fname"] . " " . $row["f_lname"] . "</td><td>" . $row["tt_day"] . "</td><td>" . $row["tt_period"] . "</td></tr>";
+  }
+  // Output the table footer
+  echo "</table>";
+} else {
+  echo "0 results";
+}
+
+}
+
+//for the class dropdown
+$sql = "SELECT DISTINCT erp_timetable.tt_subcode, erp_class.cls_id, erp_class.cls_dept, erp_class.cls_sem, erp_class.cls_course FROM `erp_class` INNER JOIN erp_timetable ON erp_class.cls_id = erp_timetable.cls_id WHERE tt_day='Mon' AND tt_period IN (";
+
+// For adding the periods into query
+foreach ($periods as $period) {
+    $sql .= "$period, ";
+  }
+  $sql = rtrim($sql, ", "); 
+  $sql .= ") AND erp_timetable.cls_id IN (";
+
+  // For adding the class ids into the query
+foreach ($cse_classids as $classid) {
+  $sql .= "$classid, ";
+}
+$sql = rtrim($sql, ", "); 
+$sql .= ") AND erp_timetable.tt_subcode IN (";
+// For adding the subjects into query
+foreach ($todaySubjects as $todaySubject) {
+    $sql .= "'$todaySubject', ";
+}
+$sql = rtrim($sql, ", "); 
+$sql .= ")";
+
+echo $sql;
+$result = mysqli_query($conn, $sql);
+$EventRows1 = array();
+
+echo "<table border=1><tr><th>Dept</th><th>Sem</th><th>Course</th></tr>";
+while ($row = mysqli_fetch_assoc($result)) {
+  echo "<tr><td>" . $row["cls_dept"] . "</td><td>" . $row["cls_sem"] . "</td> <td>" . $row["cls_course"] . "</td></tr>";
+echo $row['cls_dept'];
+    array_push($EventRows1, $row);
+}
 
 
 mysqli_close($conn);
@@ -108,25 +249,21 @@ mysqli_close($conn);
                                             <label for="AlterationHour" required="required">Alteration Hour</label>
                                             <select class="form-control" id="AlterationHour" name="AlterationHour"
                                                 required="required">
-                                                <option value="1">1</option>
+                                                <!-- <option value="1">1</option>
                                                 <option value="2">2</option>
                                                 <option value="3">3</option>
                                                 <option value="4">4</option>
                                                 <option value="5">5</option>
                                                 <option value="6">6</option>
                                                 <option value="7">7</option>
-                                                <option value="8">8</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="AlterationClass">AlterationClass</label>
-                                            <select class="form-control" id="AlterationClass" name="AlterationClass"
-                                                required="required">
+                                                <option value="8">8</option> -->
                                                 <?php
-                                                foreach ($EventRows1 as $Event) {
-                                                    echo "<option value=" . $Event['cls_id'] . ">" . $Event['cls_course'] . "-" . $Event['cls_deptname'] . "-Sem-" . $Event['cls_sem'] . "</option>";
-                                                }
-                                                ?>
+                                                foreach ($periods as $period) {
+                                                    echo "<option value='$period'>$period</option>";
+
+                                                 }
+                                                 ?>
+
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -140,6 +277,18 @@ mysqli_close($conn);
                                                 ?>
                                             </select>
                                         </div>
+                                        <div class="form-group">
+                                            <label for="AlterationClass">AlterationClass</label>
+                                            <select class="form-control" id="AlterationClass" name="AlterationClass"
+                                                required="required">
+                                                <?php
+                                                foreach ($EventRows1 as $Event) {
+                                                    echo "<option value=" . $Event['cls_id'] . ">" . $Event['cls_course'] . "-" . $Event['cls_deptname'] . "-Sem-" . $Event['cls_sem'] . "</option>";
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+                                        
                                         <input type="hidden" value="<?php echo $LeaveId; ?>" id='LeaveId'>
 
                                         <div id="Result" class="m-3">
@@ -157,44 +306,10 @@ mysqli_close($conn);
                                 </div>
                             </div>
                         </div>
+                        
 
 
-                        <script>
-                            $(function () {
-                                $("#CreateLeaveAlternativeBtn").click(function () {
-                                    var AlterationHour = $("#AlterationHour").val();
-                                    var AlterationClass = $("#AlterationClass").val();
-                                    var AlerationStaff = $("#AlerationStaff").val();
-                                    var LeaveId = $("#LeaveId").val();
-                                    console.log(AlterationHour + AlterationClass + AlerationStaff + LeaveId);
-
-                                    $.ajax({
-                                        url: 'Functions.php',
-                                        type: 'POST',
-                                        data: { AlterationHour: AlterationHour, AlterationClass: AlterationClass, AlerationStaff: AlerationStaff, LeaveId: LeaveId, Function: "CreateLeaveAlternatives" },
-                                        success: function (response) {
-                                            console.log(response);
-                                            if (response == "OK") {
-                                                $("#Result").html(`<div class="alert alert-success fade show" role="alert"> Event Created Successfully</div>`);
-                                                setTimeout(function () {
-                                                    $("#Result").html('');
-                                                    $('#CreateLeaveAlternative').modal('hide');
-                                                    location.reload();
-                                                }, 5000);
-                                            } else {
-                                                $("#Result").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
-                                                setTimeout(function () {
-                                                    $("#Result").html('');
-                                                }, 5000);
-
-                                            }
-
-                                        }
-                                    });
-
-                                });
-                            });
-                        </script>
+                        
 
 
 
@@ -251,7 +366,81 @@ mysqli_close($conn);
     </div>
 </div>
 
+<script>
+    $(document).ready(function() {
+  // Define selectedPeriod variable and set initial value to default option value
+//   var initialOption = $('#AlterationHour').val();
+  
+  // Listen for the "change" event on the "AlterationHour" dropdown menu
+  $('#AlterationHour').on('change', function() {
+    var selectedPeriod = $(this).val();
+    console.log('Selected period: ' + selectedPeriod);
 
+    $.ajax({
+                                        url: 'Functions.php',
+                                        type: 'POST',
+                                        data: { AlterationHour: AlterationHour, AlterationClass: AlterationClass, AlerationStaff: AlerationStaff, LeaveId: LeaveId, Function: "CreateLeaveAlternatives" },
+                                        success: function (response) {
+                                            console.log(response);
+                                            if (response == "OK") {
+                                                $("#Result").html(`<div class="alert alert-success fade show" role="alert"> Event Created Successfully</div>`);
+                                                setTimeout(function () {
+                                                    $("#Result").html('');
+                                                    $('#CreateLeaveAlternative').modal('hide');
+                                                    location.reload();
+                                                }, 5000);
+                                            } else {
+                                                $("#Result").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
+                                                setTimeout(function () {
+                                                    $("#Result").html('');
+                                                }, 5000);
+
+                                            }
+
+                                        }
+                                    });
+
+
+  });
+});
+
+                            $(function () {
+                                $("#CreateLeaveAlternativeBtn").click(function () {
+                                    var AlterationHour = $("#AlterationHour").val();
+                                    var AlterationClass = $("#AlterationClass").val();
+                                    var AlerationStaff = $("#AlerationStaff").val();
+                                    var LeaveId = $("#LeaveId").val();
+                                    console.log(AlterationHour + AlterationClass + AlerationStaff + LeaveId);
+
+                                    $.ajax({
+                                        url: 'Functions.php',
+                                        type: 'POST',
+                                        data: { AlterationHour: AlterationHour, AlterationClass: AlterationClass, AlerationStaff: AlerationStaff, LeaveId: LeaveId, Function: "CreateLeaveAlternatives" },
+                                        success: function (response) {
+                                            console.log(response);
+                                            if (response == "OK") {
+                                                $("#Result").html(`<div class="alert alert-success fade show" role="alert"> Event Created Successfully</div>`);
+                                                setTimeout(function () {
+                                                    $("#Result").html('');
+                                                    $('#CreateLeaveAlternative').modal('hide');
+                                                    location.reload();
+                                                }, 5000);
+                                            } else {
+                                                $("#Result").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
+                                                setTimeout(function () {
+                                                    $("#Result").html('');
+                                                }, 5000);
+
+                                            }
+
+                                        }
+                                    });
+
+                                });
+                            });
+                        
+
+</script>
 
 
 <?php include("Includes/Footer.php") ?>

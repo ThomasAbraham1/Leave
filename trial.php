@@ -3,6 +3,7 @@ include('Includes/db_connection.php');
 // Getting subjects of faculty
 $subjects = [];
 $cse_classids = [];
+$todaySubjects = [];
 $sql = "SELECT f_id, tt_subcode FROM erp_subject WHERE f_id = 'f002'";
 $result = $conn->query($sql);
 
@@ -44,17 +45,21 @@ $result = $conn->query($query);
 
 // Check if any rows were returned
 if ($result->num_rows > 0) {
+
+  $i=0;
   // Output the table header
   echo "<table border=1><tr><th>Day</th><th>Subject</th><th>Period</th></tr>";
   // Output the table rows
   $i=0;
   while ($row = $result->fetch_assoc()) {
+    $todaySubjects[$i] = $row['tt_subcode'];
     echo "<tr><td>" . $row["tt_day"] . "</td><td>" . $row["tt_subcode"] . "</td><td>" . $row["tt_period"] . "</td></tr>";
     echo 'hello';
     $periods[$i] = $row['tt_period'];
     $i++;
-    
   }
+  $todaySubjects = array_unique($todaySubjects);
+  echo $todaySubjects[1];
   // Output the table footer
   echo "</table>";
 
@@ -134,5 +139,65 @@ if ($result->num_rows > 0) {
 //     echo "0 results";
 // }
 // Close the connection
+//for the class dropdown
+$sql = "SELECT DISTINCT erp_timetable.tt_subcode, erp_class.cls_dept, erp_class.cls_sem, erp_class.cls_course FROM `erp_class` INNER JOIN erp_timetable ON erp_class.cls_id = erp_timetable.cls_id WHERE tt_day='Mon' AND tt_period IN (";
+
+// For adding the periods into query
+foreach ($periods as $period) {
+    $sql .= "$period, ";
+  }
+  $sql = rtrim($sql, ", "); 
+  $sql .= ") AND erp_timetable.cls_id IN (";
+
+  // For adding the class ids into the query
+foreach ($cse_classids as $classid) {
+  $sql .= "$classid, ";
+}
+$sql = rtrim($sql, ", "); 
+$sql .= ") AND erp_timetable.tt_subcode IN (";
+// For adding the subjects into query
+foreach ($todaySubjects as $todaySubject) {
+    $sql .= "'$todaySubject', ";
+}
+$sql = rtrim($sql, ", "); 
+$sql .= ")";
+
+echo $sql;
+$result = mysqli_query($conn, $sql);
+$EventRows1 = array();
+
+echo "<table border=1><tr><th>Dept</th><th>Sem</th><th>Course</th></tr>";
+while ($row = mysqli_fetch_assoc($result)) {
+  echo "<tr><td>" . $row["cls_dept"] . "</td><td>" . $row["cls_sem"] . "</td> <td>" . $row["cls_course"] . "</td></tr>";
+echo $row['cls_dept'];
+    array_push($EventRows1, $row);
+}
+
+
 $conn->close();
+
+echo "<input id='name' type='text'>";
+if( isset($_POST['name']) ){
+  echo `<form action="">
+  <input type="text" id="name" name="name" placeholder></form>`;
+  exit;
+}
+
 ?>
+<script>
+$(document).ready(function(){
+  $('#name').keyup(function(){
+    var name1 = $('#name').val();
+
+    $.ajax({
+       type: 'post',
+       data: {name: name1},
+       success: function(response){
+          $('#response').text('name : ' + response);
+       }
+    });
+  });
+});
+
+</script>
+

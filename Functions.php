@@ -30,6 +30,8 @@ if (isset($_POST["Function"])) {
 
     }
 
+
+
     if ($_POST["Function"] == "CreateLeaveAlternatives") {
         // execute SQL statement
         $AlterationHour = $_POST["AlterationHour"];
@@ -69,6 +71,27 @@ if (isset($_POST["Function"])) {
 
 
     }
+// Retrieve selected "AlterationHour" value from AJAX request
+$selectedPeriod = $_POST['period'];
+echo $selectedPeriod;
+// Construct SQL query to retrieve alteration staff based on selected "AlterationHour"
+$sql = "SELECT * FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode INNER JOIN erp_faculty ON erp_subject.f_id=erp_faculty.f_id WHERE tt_day='Mon' AND tt_period NOT IN ($selectedperiod) AND erp_subject.f_id NOT IN ('f_id') AND erp_subject.cls_id IN (";
+foreach ($cse_classids as $classid) {
+    $query .= "$classid, ";
+  }
+
+// Execute SQL query and retrieve results
+$result = mysqli_query($conn, $sql);
+$staff = array();
+while ($row = mysqli_fetch_assoc($result)) {
+  $staff[] = $row;
+}
+
+// Encode results as JSON and return as response
+echo json_encode($staff);
+
+// Close database connection
+mysqli_close($conn);
 
 
 
