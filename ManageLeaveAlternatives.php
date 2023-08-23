@@ -283,7 +283,7 @@ mysqli_close($conn);
                                                 required="required">
                                                 <?php
                                                 foreach ($EventRows1 as $Event) {
-                                                    echo "<option value=" . $Event['cls_id'] . ">" . $Event['cls_course'] . "-" . $Event['cls_deptname'] . "-Sem-" . $Event['cls_sem'] . "</option>";
+                                                    echo "<option value=" . $Event['cls_id'] . ">" . $Event['cls_course'] . "-" . $Event['cls_dept'] . "-Sem-" . $Event['cls_sem'] . "</option>";
                                                 }
                                                 ?>
                                             </select>
@@ -306,13 +306,6 @@ mysqli_close($conn);
                                 </div>
                             </div>
                         </div>
-                        
-
-
-                        
-
-
-
 
                     </div>
                 </div>
@@ -355,8 +348,6 @@ mysqli_close($conn);
                                     </tr>";
                                 }
                                 ?>
-
-
                             </tbody>
                         </table>
                     </div>
@@ -367,80 +358,86 @@ mysqli_close($conn);
 </div>
 
 <script>
-    $(document).ready(function() {
-  // Define selectedPeriod variable and set initial value to default option value
-//   var initialOption = $('#AlterationHour').val();
-  
-  // Listen for the "change" event on the "AlterationHour" dropdown menu
-  $('#AlterationHour').on('change', function() {
-    var selectedPeriod = $(this).val();
-    console.log('Selected period: ' + selectedPeriod);
+    $(document).ready(function () {
+        // Define selectedPeriod variable and set initial value to default option value
+          var initialOption = $('#AlterationHour').val();
 
-    $.ajax({
-                                        url: 'Functions.php',
-                                        type: 'POST',
-                                        data: { AlterationHour: AlterationHour, AlterationClass: AlterationClass, AlerationStaff: AlerationStaff, LeaveId: LeaveId, Function: "CreateLeaveAlternatives" },
-                                        success: function (response) {
-                                            console.log(response);
-                                            if (response == "OK") {
-                                                $("#Result").html(`<div class="alert alert-success fade show" role="alert"> Event Created Successfully</div>`);
-                                                setTimeout(function () {
-                                                    $("#Result").html('');
-                                                    $('#CreateLeaveAlternative').modal('hide');
-                                                    location.reload();
-                                                }, 5000);
-                                            } else {
-                                                $("#Result").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
-                                                setTimeout(function () {
-                                                    $("#Result").html('');
-                                                }, 5000);
+        // Listen for the "change" event on the "AlterationHour" dropdown menu
+        $('#AlterationHour').on('change', function () {
+            var selectedPeriod = $(this).val();
+            console.log('Selected period: ' + selectedPeriod);
 
-                                            }
+            $.ajax({
+                url: 'Functions.php',
+                type: 'POST',
+                data: { selectedPeriod: selectedPeriod, Function: "AleternationHourDropdownChange" },
+                success: function (response) {
+                    console.log(response);
+                    if (response == "OK") {
+                        $("#Result").html(`<div class="alert alert-success fade show" role="alert"> Event Created Successfully</div>`);
+                        setTimeout(function () {
+                            $("#Result").html('');
+                            $('#CreateLeaveAlternative').modal('hide');
+                            location.reload();
+                        }, 5000);
+                    } else {
+                        var data=JSON.parse(response);
+                        console.log(data);
+                        alert(`${data[0].cls_course} ${data[0].cls_sem}`);
+                        $course = data[0].cls_course;
+                        $sem = data[0].cls_sem;
+                        $("#Result").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
+                        setTimeout(function () {
+                            $("#Result").html('');
+                        }, 5000);
 
-                                        }
-                                    });
+                    }
+
+                }
+            });
 
 
-  });
-});
+        });
+        // Changing Alteration Class selection according to the period selected in Alternative creation
+        if()
+    });
 
-                            $(function () {
-                                $("#CreateLeaveAlternativeBtn").click(function () {
-                                    var AlterationHour = $("#AlterationHour").val();
-                                    var AlterationClass = $("#AlterationClass").val();
-                                    var AlerationStaff = $("#AlerationStaff").val();
-                                    var LeaveId = $("#LeaveId").val();
-                                    console.log(AlterationHour + AlterationClass + AlerationStaff + LeaveId);
+    $(function () {
+        $("#CreateLeaveAlternativeBtn").click(function () {
+            var AlterationHour = $("#AlterationHour").val();
+            var AlterationClass = $("#AlterationClass").val();
+            var AlerationStaff = $("#AlerationStaff").val();
+            var LeaveId = $("#LeaveId").val();
+            console.log(AlterationHour + AlterationClass + AlerationStaff + LeaveId);
 
-                                    $.ajax({
-                                        url: 'Functions.php',
-                                        type: 'POST',
-                                        data: { AlterationHour: AlterationHour, AlterationClass: AlterationClass, AlerationStaff: AlerationStaff, LeaveId: LeaveId, Function: "CreateLeaveAlternatives" },
-                                        success: function (response) {
-                                            console.log(response);
-                                            if (response == "OK") {
-                                                $("#Result").html(`<div class="alert alert-success fade show" role="alert"> Event Created Successfully</div>`);
-                                                setTimeout(function () {
-                                                    $("#Result").html('');
-                                                    $('#CreateLeaveAlternative').modal('hide');
-                                                    location.reload();
-                                                }, 5000);
-                                            } else {
-                                                $("#Result").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
-                                                setTimeout(function () {
-                                                    $("#Result").html('');
-                                                }, 5000);
+            $.ajax({
+                url: 'Functions.php',
+                type: 'POST',
+                data: { AlterationHour: AlterationHour, AlterationClass: AlterationClass, AlerationStaff: AlerationStaff, LeaveId: LeaveId, Function: "CreateLeaveAlternatives" },
+                success: function (response) {
+                    console.log(response);
+                    if (response == "OK") {
+                        $("#Result").html(`<div class="alert alert-success fade show" role="alert"> Event Created Successfully</div>`);
+                        setTimeout(function () {
+                            $("#Result").html('');
+                            $('#CreateLeaveAlternative').modal('hide');
+                            location.reload();
+                        }, 5000);
+                    } else {
+                        $("#Result").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
+                        setTimeout(function () {
+                            $("#Result").html('');
+                        }, 5000);
 
-                                            }
+                    }
 
-                                        }
-                                    });
+                }
+            });
 
-                                });
-                            });
-                        
+        });
+    });
+
 
 </script>
-
 
 <?php include("Includes/Footer.php") ?>
