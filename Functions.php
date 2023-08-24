@@ -78,7 +78,7 @@ if (isset($_POST["Function"])) {
         // execute SQL statement
         $selectedPeriod = $_POST["selectedPeriod"];
 
-        $sql = "SELECT DISTINCT erp_timetable.tt_subcode, erp_class.cls_id, erp_class.cls_dept, erp_class.cls_sem, erp_class.cls_course FROM `erp_class` INNER JOIN erp_timetable ON erp_class.cls_id = erp_timetable.cls_id WHERE tt_day='Mon' AND tt_period IN (1, 2, 3, 8) AND erp_timetable.cls_id IN (1, 4, 11, 12, 14) AND erp_timetable.tt_subcode IN ('CS8601', 'CS3452') AND erp_timetable.tt_period = $selectedPeriod;";
+        $sql = "SELECT DISTINCT erp_timetable.tt_subcode, erp_class.cls_id,erp_timetable.tt_period,erp_class.cls_dept, erp_class.cls_sem, erp_class.cls_course FROM `erp_class` INNER JOIN erp_timetable ON erp_class.cls_id = erp_timetable.cls_id WHERE tt_day='Mon' AND tt_period IN (1, 2, 3, 8) AND erp_timetable.cls_id IN (1, 4, 11, 12, 14) AND erp_timetable.tt_subcode IN ('CS8601', 'CS3452') AND erp_timetable.tt_period = $selectedPeriod;";
         $result = mysqli_query($conn, $sql);
         $TableRows = array();
         // Process the result set

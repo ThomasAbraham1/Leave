@@ -386,6 +386,7 @@ mysqli_close($conn);
                         alert(`${data[0].cls_course} ${data[0].cls_sem}`);
                         $course = data[0].cls_course;
                         $sem = data[0].cls_sem;
+                        $dept =data[0].cls_dept;
                         $("#Result").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
                         setTimeout(function () {
                             $("#Result").html('');
@@ -399,7 +400,8 @@ mysqli_close($conn);
 
         });
         // Changing Alteration Class selection according to the period selected in Alternative creation
-        if()
+        var alterationClass = $("#AlterationClass");
+        
     });
 
     $(function () {
