@@ -161,8 +161,6 @@ foreach ($todaySubjects as $todaySubject) {
 }
 $sql = rtrim($sql, ", "); 
 $sql .= ")";
-
-echo $sql;
 $result = mysqli_query($conn, $sql);
 $EventRows1 = array();
 

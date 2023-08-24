@@ -77,7 +77,10 @@ if (isset($_POST["Function"])) {
     if ($_POST["Function"] == "AleternationHourDropdownChange") {
         // execute SQL statement
         $selectedPeriod = $_POST["selectedPeriod"];
-
+// //         $cse_classids = $_POST["cse_classids"];
+//         $periods = $_POST['periods'];  
+// $periods = json_decode($periods, true);
+// Query for matching period with Alternative Class
         $sql = "SELECT DISTINCT erp_timetable.tt_subcode, erp_class.cls_id,erp_timetable.tt_period,erp_class.cls_dept, erp_class.cls_sem, erp_class.cls_course FROM `erp_class` INNER JOIN erp_timetable ON erp_class.cls_id = erp_timetable.cls_id WHERE tt_day='Mon' AND tt_period IN (1, 2, 3, 8) AND erp_timetable.cls_id IN (1, 4, 11, 12, 14) AND erp_timetable.tt_subcode IN ('CS8601', 'CS3452') AND erp_timetable.tt_period = $selectedPeriod;";
         $result = mysqli_query($conn, $sql);
         $TableRows = array();
@@ -86,6 +89,39 @@ if (isset($_POST["Function"])) {
             // Do something with each row
             array_push($TableRows, $row);
         }
+// Code for matching period and alternative staffs available
+
+    // Build the query string
+    // $query = "SELECT * FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode WHERE tt_day='Mon' AND tt_period NOT IN (";
+    // foreach ($periods as $period) {
+    //   $query .= "$period, ";
+    // }
+    
+    // $query = "SELECT * FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode INNER JOIN erp_faculty ON erp_subject.f_id=erp_faculty.f_id WHERE tt_day='Mon' AND tt_period NOT IN ($period) AND erp_subject.f_id NOT IN ('f002') AND erp_subject.cls_id IN (";
+    // // $query = rtrim($query, ", "); // Remove the last comma and space
+    
+    // // $query .= ")";
+
+    // foreach ($cse_classids as $classid) {
+    //   $query .= "$classid, ";
+    // }
+    // $query = rtrim($query, ", "); 
+    // $query .= ")";
+    // // Execute the query and fetch the results
+    // $result = $conn->query($query);
+    
+    // // Check if any rows were returned
+    // if ($result->num_rows > 0) {
+    //   // Output the table header
+    //   // Output the table rows
+    //   while ($row = $result->fetch_assoc()) {
+    //   }
+    //   // Output the table footer
+    // } else {
+    // }
+    
+
+
 
         if (count($TableRows)>0) {
             echo json_encode($TableRows);
