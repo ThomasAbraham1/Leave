@@ -41,15 +41,15 @@ $result = $conn->query($sql);
 
 // Check if any rows were returned
 if ($result->num_rows > 0) {
-    
+
     // Output the table header
     // Output the table rows
-     $i =0;
+    $i = 0;
     foreach ($result as $row) {
-       
-        $subjects[$i] = $row['tt_subcode']; 
+
+        $subjects[$i] = $row['tt_subcode'];
         $i++;
-      }
+    }
     // Output the table footer
 
 } else {
@@ -58,8 +58,8 @@ if ($result->num_rows > 0) {
 
 $query = "SELECT tt_day, tt_period, tt_subcode FROM erp_timetable WHERE tt_day='Mon' AND (";
 foreach ($subjects as $subject) {
-  $q = $query . "tt_subcode='$subject' OR ";
-  $query = $q;
+    $q = $query . "tt_subcode='$subject' OR ";
+    $query = $q;
 }
 $query = rtrim($query, " OR "); // Remove the last " OR "
 $query .= ")";
@@ -70,64 +70,64 @@ $result = $conn->query($query);
 // Check if any rows were returned
 if ($result->num_rows > 0) {
 
-    $i=0;
+    $i = 0;
     // Output the table header
 
     // Output the table rows
-    $i=0;
+    $i = 0;
     while ($row = $result->fetch_assoc()) {
-      $todaySubjects[$i] = $row['tt_subcode'];
-      $periods[$i] = $row['tt_period'];
-      $i++;
+        $todaySubjects[$i] = $row['tt_subcode'];
+        $periods[$i] = $row['tt_period'];
+        $i++;
     }
     $todaySubjects = array_unique($todaySubjects);
     // Output the table footer  
-  } else {
+} else {
     echo "0 results";
-  }
-  
+}
+
 
 $sql = "SELECT DISTINCT cls_deptname, cls_id FROM erp_class WHERE cls_deptname ='Computer Science And Engineering' ";
 $result = $conn->query($sql);
-if($result->num_rows >0){
-  $i = 0;
-  while ($row = $result->fetch_assoc()) {
-    $cse_classids[$i] = $row['cls_id'];
-  $i++;
-  }
+if ($result->num_rows > 0) {
+    $i = 0;
+    while ($row = $result->fetch_assoc()) {
+        $cse_classids[$i] = $row['cls_id'];
+        $i++;
+    }
 }
 
 foreach ($periods as $period) {
-// Build the query string
+    // Build the query string
 // $query = "SELECT * FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode WHERE tt_day='Mon' AND tt_period NOT IN (";
 // foreach ($periods as $period) {
 //   $query .= "$period, ";
 // }
 
-$query = "SELECT * FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode INNER JOIN erp_faculty ON erp_subject.f_id=erp_faculty.f_id WHERE tt_day='Mon' AND tt_period NOT IN ($period) AND erp_subject.f_id NOT IN ('f002') AND erp_subject.cls_id IN (";
-// $query = rtrim($query, ", "); // Remove the last comma and space
+    $query = "SELECT * FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode INNER JOIN erp_faculty ON erp_subject.f_id=erp_faculty.f_id WHERE tt_day='Mon' AND tt_period NOT IN ($period) AND erp_subject.f_id NOT IN ('f002') AND erp_subject.cls_id IN (";
+    // $query = rtrim($query, ", "); // Remove the last comma and space
 
-// $query .= ")";
-foreach ($cse_classids as $classid) {
-  $query .= "$classid, ";
-}
-$query = rtrim($query, ", "); 
-$query .= ")";
-// Execute the query and fetch the results
-$result = $conn->query($query);
+    // $query .= ")";
+    foreach ($cse_classids as $classid) {
+        $query .= "$classid, ";
+    }
+    $query = rtrim($query, ", ");
+    $query .= ")";
+    // Execute the query and fetch the results
+    $result = $conn->query($query);
 
-// Check if any rows were returned
-if ($result->num_rows > 0) {
-  // Output the table header
+    // Check if any rows were returned
+    if ($result->num_rows > 0) {
+        // Output the table header
 
-  // Output the table rows
-  while ($row = $result->fetch_assoc()) {
+        // Output the table rows
+        while ($row = $result->fetch_assoc()) {
 
-  }
-  // Output the table footer
-} else {
-  echo "0 results";
-}
+        }
+        // Output the table footer
+    } else {
+        echo "0 results";
+    }
 
 }
 
@@ -139,21 +139,21 @@ $sql = "SELECT DISTINCT erp_timetable.tt_subcode, erp_class.cls_id, erp_class.cl
 // For adding the periods into query
 foreach ($periods as $period) {
     $sql .= "$period, ";
-  }
-  $sql = rtrim($sql, ", "); 
-  $sql .= ") AND erp_timetable.cls_id IN (";
-
-  // For adding the class ids into the query
-foreach ($cse_classids as $classid) {
-  $sql .= "$classid, ";
 }
-$sql = rtrim($sql, ", "); 
+$sql = rtrim($sql, ", ");
+$sql .= ") AND erp_timetable.cls_id IN (";
+
+// For adding the class ids into the query
+foreach ($cse_classids as $classid) {
+    $sql .= "$classid, ";
+}
+$sql = rtrim($sql, ", ");
 $sql .= ") AND erp_timetable.tt_subcode IN (";
 // For adding the subjects into query
 foreach ($todaySubjects as $todaySubject) {
     $sql .= "'$todaySubject', ";
 }
-$sql = rtrim($sql, ", "); 
+$sql = rtrim($sql, ", ");
 $sql .= ")";
 
 $result = mysqli_query($conn, $sql);
@@ -165,7 +165,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 
 $subjects = json_encode($periods);
-
+echo $subjects;
 mysqli_close($conn);
 ?>
 
@@ -240,8 +240,8 @@ mysqli_close($conn);
                                                 foreach ($periods as $period) {
                                                     echo "<option value='$period'>$period</option>";
 
-                                                 }
-                                                 ?>
+                                                }
+                                                ?>
 
                                             </select>
                                         </div>
@@ -249,10 +249,11 @@ mysqli_close($conn);
                                             <label for="AlerationStaff">AlerationStaff</label>
                                             <select class="form-control" id="AlerationStaff" name="AlerationStaff"
                                                 required="required">
+
                                                 <?php
-                                                foreach ($EventRows as $Event) {
-                                                    echo "<option value=" . $Event['f_id'] . ">" . $Event['f_fname'] . " " . $Event['f_lname'] . "</option>";
-                                                }
+                                                // foreach ($EventRows as $Event) {
+                                                //     echo "<option value=" . $Event['f_id'] . ">" . $Event['f_fname'] . " " . $Event['f_lname'] . "</option>";
+                                                // }
                                                 ?>
                                             </select>
                                         </div>
@@ -262,7 +263,7 @@ mysqli_close($conn);
                                                value="Hello" required="required">
                                                 <?php
                                                 foreach ($EventRows1 as $Event) {
-                                                    echo "<option value=" . $Event['cls_course'] . "-" . $Event['cls_dept'] . "-Sem-" . $Event['cls_sem']. ">" . $Event['cls_course'] . "-" . $Event['cls_dept'] . "-Sem-" . $Event['cls_sem'] . "</option>";
+                                                    echo "<option value=" . $Event['cls_course'] . "-" . $Event['cls_dept'] . "-Sem-" . $Event['cls_sem'] . ">" . $Event['cls_course'] . "-" . $Event['cls_dept'] . "-Sem-" . $Event['cls_sem'] . "</option>";
                                                 }
                                                 ?>
                                             </select>
@@ -308,13 +309,15 @@ mysqli_close($conn);
                                     $staffaccept = $TableRow['la_staffacpt'] == 0 ? "false" : "true";
                                     $hodaccept = $TableRow['la_hodacpt'] == 0 ? "false" : "true";
                                     $principalaccept = $TableRow['la_principalacpt'] == 0 ? "false" : "true";
-                                    $staffName="";
-                                    foreach($EventRows as $row){
-                                        if($row['f_id']==$TableRow['f_id'])$staffName="$row[f_fname] $row[f_lname]";
+                                    $staffName = "";
+                                    foreach ($EventRows as $row) {
+                                        if ($row['f_id'] == $TableRow['f_id'])
+                                            $staffName = "$row[f_fname] $row[f_lname]";
                                     }
-                                    $ClassName="";
-                                    foreach($EventRows1 as $row){
-                                        if($row['cls_id']==$TableRow['cls_id'])$ClassName="$row[cls_course]-$row[cls_deptname]-Sem-$row[cls_sem]";
+                                    $ClassName = "";
+                                    foreach ($EventRows1 as $row) {
+                                        if ($row['cls_id'] == $TableRow['cls_id'])
+                                            $ClassName = "$row[cls_course]-$row[cls_deptname]-Sem-$row[cls_sem]";
                                     }
                                     echo "<a href ='../Leave/ManageLeaveAlternatives.php'><tr>
                                         <td>$TableRow[la_date]</td>
@@ -335,9 +338,9 @@ mysqli_close($conn);
         </div>
     </div>
 </div>
-<?php 
-    $cse_classids = json_encode($cse_classids);
-    
+<?php
+$cse_classids = json_encode($cse_classids);
+
 ?>
 
 
@@ -354,25 +357,21 @@ mysqli_close($conn);
             for (var i = 0; i < alterationHourLength.length -1; i++) {
     var element = alterationHourLength[i+1];
     periods.push(element.getAttribute('value'));
-
 }
 console.log(periods);
-
-
             var alterationClass = $("#AlterationClass").children();
 var childrenArray = Array.from(alterationClass);
 for (var i = 0; i < childrenArray.length; i++) {
     var element = childrenArray[i];
     element.removeAttribute('selected');
-
 }
             var selectedPeriod = $(this).val();
             console.log('Selected period: ' + selectedPeriod);
-            var periods = <?php echo $periods ?>
+            var cse_classids = <?php echo $cse_classids ?>;
             $.ajax({
                 url: 'Functions.php',
                 type: 'POST',
-                data: { selectedPeriod: selectedPeriod,  Function: "AleternationHourDropdownChange" },
+                data: { selectedPeriod: selectedPeriod, cse_classids: cse_classids, Function: "AleternationHourDropdownChange" },
                 success: function (response) {
                     console.log(response);
                     if (response == "OK") {
@@ -383,17 +382,22 @@ for (var i = 0; i < childrenArray.length; i++) {
                             location.reload();
                         }, 5000);
                     } else {
+
                         var data=JSON.parse(response);
-                        console.log(data);
-                        alert(`${data[0].cls_course} ${data[0].cls_sem}`);
+                        // console.log(data[0]);
+                        // alert(`${data[0].cls_course} ${data[0].cls_sem}`);
                         var course = data[0].cls_course;
                         var sem = data[0].cls_sem;
                         var dept =data[0].cls_dept;
-
-
                         var periodMatching = `${course}-${dept}-Sem-${sem}`;
-                    
-
+                        var altPeriods = data.slice(1,data.length-1);
+                        console.log(altPeriods);
+            // Creating <option> tags for the ALteration Staff in Alterations creation
+                    var staffSelectElement = document.getElementById('AlerationStaff');
+                    for (var i = 0; i < altPeriods.length; i++) {
+                        var row = altPeriods[i];
+                        staffSelectElement.innerHTML += `<option value='${row.f_id}'> ${row.f_fname} ${row.f_lname} </option>`;
+                    }
 for (var i = 0; i < childrenArray.length; i++) {
     var element = childrenArray[i];
     console.log(element);
@@ -403,35 +407,17 @@ for (var i = 0; i < childrenArray.length; i++) {
 
     }
 }
-
-
-                        $("#Result").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
-                        setTimeout(function () {
-                            $("#Result").html('');
-                        }, 5000);
+                        // $("#Result").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
+                        // setTimeout(function () {
+                        //     $("#Result").html('');
+                        // }, 5000);
 
                     }
 
                 }
             });
-        
-
 
         });
-        // Changing Alteration Class selection according to the period selected in Alternative creation
-//         var initialAlterationOption = $('AlterationHour').val();
-//         var alterationClass = $("#AlterationClass").children();
-// var childrenArray = Array.from(alterationClass);
-
-// for (var i = 0; i < childrenArray.length; i++) {
-//     var element = childrenArray[i].getAttribute('value');
-//     console.log(element);
-//     if(initialAlterationOption == element ){
-//         element.attr('selected','selected');
-
-//     }
-// }
-        
     });
 
     $(function () {
