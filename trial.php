@@ -140,7 +140,7 @@ if ($result->num_rows > 0) {
 // }
 // Close the connection
 //for the class dropdown
-$sql = "SELECT DISTINCT erp_timetable.tt_subcode, erp_class.cls_dept, erp_class.cls_sem, erp_class.cls_course FROM `erp_class` INNER JOIN erp_timetable ON erp_class.cls_id = erp_timetable.cls_id WHERE tt_day='Mon' AND tt_period IN (";
+$sql = "SELECT DISTINCT erp_timetable.cls_id,erp_timetable.tt_subcode, erp_class.cls_dept, erp_class.cls_sem, erp_class.cls_course FROM `erp_class` INNER JOIN erp_timetable ON erp_class.cls_id = erp_timetable.cls_id WHERE tt_day='Mon' AND tt_period IN (";
 
 // For adding the periods into query
 foreach ($periods as $period) {
@@ -164,13 +164,25 @@ $sql .= ")";
 $result = mysqli_query($conn, $sql);
 $EventRows1 = array();
 
-echo "<table border=1><tr><th>Dept</th><th>Sem</th><th>Course</th></tr>";
+echo "<table border=1><tr><th>class id</th><th>Dept</th><th>Sem</th><th>Course</th></tr>";
 while ($row = mysqli_fetch_assoc($result)) {
-  echo "<tr><td>" . $row["cls_dept"] . "</td><td>" . $row["cls_sem"] . "</td> <td>" . $row["cls_course"] . "</td></tr>";
+  echo "<tr><td>" . $row["cls_id"] . "</td><td>" . $row["cls_dept"] . "</td><td>" . $row["cls_sem"] . "</td> <td>" . $row["cls_course"] . "</td></tr>";
 echo $row['cls_dept'];
     array_push($EventRows1, $row);
 }
 
+
+
+$sql = "SELECT erp_class.cls_id, cls_course, cls_dept, cls_sem FROM erp_class INNER JOIN erp_leave_alt ON erp_class.cls_id = erp_leave_alt.cls_id WHERE lv_id = 1";
+$result = mysqli_query($conn,$sql);
+$Eventrows2 = array();
+
+echo "<table border=1><tr><th>class id</th><th>Dept</th><th>Sem</th><th>Course</th></tr>";
+
+while($row = mysqli_fetch_assoc($result)){
+  array_push($EventRows1, $row);
+
+}
 
 $conn->close();
 

@@ -1,4 +1,11 @@
-<?php include("Includes/Header.php") ?>
+<?php 
+
+session_start();
+
+if(isset($_SESSION['login_data'])){
+
+include("Includes/Header.php"); 
+$log_id = $_SESSION['login_data']; ?>
 
 
 <?php
@@ -6,7 +13,7 @@
 include('Includes/db_connection.php');
 
 // Execute an SQL query
-$sql = 'SELECT * FROM `erp_leave` JOIN erp_faculty on erp_leave.f_id=erp_faculty.f_id';
+$sql = "SELECT * FROM `erp_leave` JOIN erp_faculty on erp_leave.f_id=erp_faculty.f_id WHERE erp_leave.f_id ='" . $log_id. "'"; // Add WHERE Clause with given session fid
 $result = mysqli_query($conn, $sql);
 // Process the result set
 $TableRows = array();
@@ -99,7 +106,7 @@ mysqli_close($conn);
                                         <td>$TableRow[lv_applyon]</td>
                                         <td>$TableRow[lv_sdate] $formattedStime</td>
                                         <td>$TableRow[lv_edate] $formattedEtime</td>
-                                        <td class='text-center' ><a class='hyperlink' onload='myFunc()' href='../Leave/ManageLeaveAlternatives.php?Menu=ManageImages&LeaveId=$TableRow[lv_id]&fid=$TableRow[f_id]' >
+                                        <td class='text-center' ><a class='hyperlink' onload='myFunc()' href='../Leave/ManageLeaveAlternatives.php?Menu=ManageImages&LeaveId=$TableRow[lv_id]' >
                                         <form class='fid' action='/Leave/trial.php'>
                                         <input type='hidden' value='$TableRow[f_id]'>
                                     </form>
@@ -139,4 +146,10 @@ mysqli_close($conn);
 
 
 
-<?php include("Includes/Footer.php") ?>
+<?php
+} else{
+    header("Location:flogin.php");
+};
+
+
+include("Includes/Footer.php") ?>

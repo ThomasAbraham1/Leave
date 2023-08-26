@@ -1,12 +1,27 @@
-<?php include("Includes/Header.php") ?>
+
+<?php
+include("Includes/session_header.php"); 
+
+session_start();
+
+if(isset($_SESSION['login_data'])){
+
+include("Includes/Header.php") ?>
 
 
 <?php
+
+$log_id = $_SESSION['login_data']; 
+
+
+
+
+
+
 // Include the database connection file
 include('Includes/db_connection.php');
-
 // Execute an SQL query
-$sql = 'SELECT * FROM erp_faculty';
+$sql = "SELECT * FROM erp_faculty WHERE f_id = '". $log_id ."'";
 $result = mysqli_query($conn, $sql);
 $EventRows = array();
 // Process the result set
@@ -36,7 +51,7 @@ mysqli_close($conn);
 
 
         <div class="form-group">
-            <label for="Event">Select Staff</label>
+            <label for="Event">Select Name</label>
             <select class="form-control" id="Staff" name="Staff" required="required">
                 <?php
                 foreach ($EventRows as $Event) {
@@ -169,4 +184,10 @@ mysqli_close($conn);
 
 
 
-<?php include("Includes/Footer.php") ?>
+<?php } else{
+    header("Location:flogin.php");
+};
+include("Includes/Footer.php");
+
+
+?>

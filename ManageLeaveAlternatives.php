@@ -1,4 +1,12 @@
-<?php include("Includes/Header.php") ?>
+<?php
+
+
+session_start();
+
+if(isset($_SESSION['login_data'])){
+    $log_id = $_SESSION['login_data']; 
+    echo $log_id;
+    include("Includes/Header.php") ?>
 
 
 <?php
@@ -8,7 +16,7 @@ if (isset($_GET["LeaveId"])) {
 // Include the database connection file
 include('Includes/db_connection.php');
 //For the table
-$sql = "SELECT * FROM `erp_leave_alt` JOIN erp_faculty on erp_leave_alt.f_id=erp_faculty.f_id WHERE erp_leave_alt.lv_id=" . $LeaveId;
+$sql = "SELECT erp_leave_alt.f_id, erp_leave_alt.la_date, erp_leave_alt.la_hour, la_principalacpt,la_hodacpt, la_staffacpt, erp_leave_alt.cls_id FROM `erp_leave_alt` JOIN erp_faculty on erp_leave_alt.f_id=erp_faculty.f_id WHERE erp_leave_alt.lv_id=" . $LeaveId ."";
 $result = mysqli_query($conn, $sql);
 $TableRows = array();
 while ($row = mysqli_fetch_assoc($result)) {
@@ -35,7 +43,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 $subjects = [];
 $cse_classids = [];
 $periods = [];
-$sql = "SELECT f_id, tt_subcode FROM erp_subject WHERE f_id = 'f002'";
+$sql = "SELECT f_id, tt_subcode FROM erp_subject WHERE f_id = '$log_id'";
 $result = $conn->query($sql);
 
 
@@ -104,7 +112,7 @@ foreach ($periods as $period) {
 //   $query .= "$period, ";
 // }
 
-    $query = "SELECT * FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode INNER JOIN erp_faculty ON erp_subject.f_id=erp_faculty.f_id WHERE tt_day='Mon' AND tt_period NOT IN ($period) AND erp_subject.f_id NOT IN ('f002') AND erp_subject.cls_id IN (";
+    $query = "SELECT * FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode INNER JOIN erp_faculty ON erp_subject.f_id=erp_faculty.f_id WHERE tt_day='Mon' AND tt_period NOT IN ($period) AND erp_subject.f_id NOT IN ('$log_id') AND erp_subject.cls_id IN (";
     // $query = rtrim($query, ", "); // Remove the last comma and space
 
     // $query .= ")";
@@ -134,7 +142,7 @@ foreach ($periods as $period) {
 //for the class dropdown
 
 //THIS IS IT
-$sql = "SELECT DISTINCT erp_timetable.tt_subcode, erp_class.cls_id, erp_class.cls_dept, erp_class.cls_sem, erp_class.cls_course FROM `erp_class` INNER JOIN erp_timetable ON erp_class.cls_id = erp_timetable.cls_id WHERE tt_day='Mon' AND tt_period IN (";
+$sql = "SELECT DISTINCT erp_timetable.cls_id,erp_timetable.tt_subcode, erp_class.cls_id, erp_class.cls_dept, erp_class.cls_sem, erp_class.cls_course FROM `erp_class` INNER JOIN erp_timetable ON erp_class.cls_id = erp_timetable.cls_id WHERE tt_day='Mon' AND tt_period IN (";
 
 // For adding the periods into query
 foreach ($periods as $period) {
@@ -161,6 +169,15 @@ $EventRows1 = array();
 
 while ($row = mysqli_fetch_assoc($result)) {
     array_push($EventRows1, $row);
+}
+
+
+$sql = "SELECT erp_class.cls_id, cls_course, cls_dept, cls_sem FROM erp_class INNER JOIN erp_leave_alt ON erp_class.cls_id = erp_leave_alt.cls_id WHERE lv_id = 1";
+$result = mysqli_query($conn,$sql);
+$EventRows2 = array();
+
+while($row = mysqli_fetch_assoc($result)){
+    array_push($EventRows2, $row);
 }
 
 
@@ -260,10 +277,10 @@ mysqli_close($conn);
                                         <div class="form-group">
                                             <label for="AlterationClass">AlterationClass</label>
                                             <select class="form-control" id="AlterationClass" name="AlterationClass"
-                                               value="Hello" required="required">
+                                                required="required">
                                                 <?php
                                                 foreach ($EventRows1 as $Event) {
-                                                    echo "<option value=" . $Event['cls_course'] . "-" . $Event['cls_dept'] . "-Sem-" . $Event['cls_sem'] . ">" . $Event['cls_course'] . "-" . $Event['cls_dept'] . "-Sem-" . $Event['cls_sem'] . "</option>";
+                                                    echo "<option value=" . $Event['cls_id'] . ">" . $Event['cls_course'] . "-" . $Event['cls_dept'] . "-Sem-" . $Event['cls_sem'] . "</option>";
                                                 }
                                                 ?>
                                             </select>
@@ -315,9 +332,9 @@ mysqli_close($conn);
                                             $staffName = "$row[f_fname] $row[f_lname]";
                                     }
                                     $ClassName = "";
-                                    foreach ($EventRows1 as $row) {
+                                    foreach ($EventRows2 as $row) {
                                         if ($row['cls_id'] == $TableRow['cls_id'])
-                                            $ClassName = "$row[cls_course]-$row[cls_deptname]-Sem-$row[cls_sem]";
+                                            $ClassName = "$row[cls_course]-$row[cls_dept]-Sem-$row[cls_sem]";
                                     }
                                     echo "<a href ='../Leave/ManageLeaveAlternatives.php'><tr>
                                         <td>$TableRow[la_date]</td>
@@ -401,7 +418,7 @@ for (var i = 0; i < childrenArray.length; i++) {
 for (var i = 0; i < childrenArray.length; i++) {
     var element = childrenArray[i];
     console.log(element);
-    if(periodMatching == element.getAttribute('value') ){
+    if(periodMatching == element.innerHTML ){
         element.setAttribute('selected','selected');
         break;
 
@@ -458,4 +475,8 @@ for (var i = 0; i < childrenArray.length; i++) {
 
 </script>
 
-<?php include("Includes/Footer.php") ?>
+<?php 
+} else{
+    header("Location:flogin.php");
+}
+include("Includes/Footer.php"); ?>
