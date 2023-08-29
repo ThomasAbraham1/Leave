@@ -104,9 +104,12 @@ if ($result->num_rows > 0) {
   echo '<h3>'. $period . '</h3>';
   echo "<table border=1><tr><th>Fid</th><th>Fname</th><th>Day</th><th>Available alternatives</th></tr>";
   // Output the table rows
+
   while ($row = $result->fetch_assoc()) {
     echo "<tr><td>" . $row["f_id"] . "</td><td>" . $row["f_fname"] . " " . $row["f_lname"] . "</td><td>" . $row["tt_day"] . "</td><td>" . $row["tt_period"] . "</td></tr>";
+    
   }
+  echo $query;
   // Output the table footer
   echo "</table>";
 } else {
@@ -164,6 +167,7 @@ $sql .= ")";
 $result = mysqli_query($conn, $sql);
 $EventRows1 = array();
 
+echo $sql;
 echo "<table border=1><tr><th>class id</th><th>Dept</th><th>Sem</th><th>Course</th></tr>";
 while ($row = mysqli_fetch_assoc($result)) {
   echo "<tr><td>" . $row["cls_id"] . "</td><td>" . $row["cls_dept"] . "</td><td>" . $row["cls_sem"] . "</td> <td>" . $row["cls_course"] . "</td></tr>";
@@ -193,6 +197,28 @@ if( isset($_POST['name']) ){
   exit;
 }
 
+
+
+
+
+$sql = "SELECT DISTINCT erp_timetable.tt_subcode, erp_class.cls_id,erp_timetable.tt_period,erp_class.cls_dept, erp_class.cls_sem, erp_class.cls_course FROM `erp_class` INNER JOIN erp_timetable ON erp_class.cls_id = erp_timetable.cls_id WHERE tt_day='Mon' AND tt_period IN (";
+        foreach ($periods as $period) {
+            $sql .= "$period, ";
+        }
+        $sql = rtrim($sql, ", ");
+        $sql .= ") AND erp_timetable.cls_id IN (";
+        foreach ($cse_classids as $cse_classid) {
+            $sql .= "$cse_classid, ";
+        }
+        $sql = rtrim($sql, ", ");
+        $sql .= ") AND erp_timetable.tt_subcode IN (";
+        foreach ($todaySubjects as $todaySubject) {
+            $sql .= "'$todaySubject', ";
+        }
+        $sql = rtrim($sql, ", ");
+        $sql .= ") AND erp_timetable.tt_period = $selectedPeriod";
+
+echo $sql;
 ?>
 <script>
 $(document).ready(function(){

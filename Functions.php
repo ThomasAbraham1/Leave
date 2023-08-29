@@ -76,13 +76,39 @@ if (isset($_POST["Function"])) {
 
     if ($_POST["Function"] == "AleternationHourDropdownChange") {
         // execute SQL statement
+        $f_id = $_POST["f_id"];
+        $periods = $_POST["periods"];
+        $todaySubjects = $_POST["todaySubjects"];
         $selectedPeriod = $_POST["selectedPeriod"];
         $cse_classids = $_POST["cse_classids"];
         //         $periods = $_POST['periods'];  
 // $periods = json_decode($periods, true);
 // Query for matching period with Alternative Class
-        $sql = "SELECT DISTINCT erp_timetable.tt_subcode, erp_class.cls_id,erp_timetable.tt_period,erp_class.cls_dept, erp_class.cls_sem, erp_class.cls_course FROM `erp_class` INNER JOIN erp_timetable ON erp_class.cls_id = erp_timetable.cls_id WHERE tt_day='Mon' AND tt_period IN (1, 2, 3, 8) AND erp_timetable.cls_id IN (1, 4, 11, 12, 14) AND erp_timetable.tt_subcode IN ('CS8601', 'CS3452') AND erp_timetable.tt_period = $selectedPeriod;";
-        $result = mysqli_query($conn, $sql);
+
+
+        $sql = "SELECT DISTINCT erp_timetable.cls_id,erp_timetable.tt_subcode, erp_class.cls_dept, erp_class.cls_sem, erp_class.cls_course FROM `erp_class` INNER JOIN erp_timetable ON erp_class.cls_id = erp_timetable.cls_id WHERE tt_day='Mon' AND tt_period IN ($selectedPeriod";
+
+        // For adding the periods into query
+        // foreach ($periods as $period) {
+        //     $sql .= "$period, ";
+        // }
+        // $sql = rtrim($sql, ", ");
+        $sql .= ") AND erp_timetable.cls_id IN (";
+
+        // For adding the class ids into the query
+        foreach ($cse_classids as $classid) {
+            $sql .= "$classid, ";
+        }
+        $sql = rtrim($sql, ", ");
+        $sql .= ") AND erp_timetable.tt_subcode IN (";
+        // For adding the subjects into query
+        foreach ($todaySubjects as $todaySubject) {
+            $sql .= "'$todaySubject', ";
+        }
+        $sql = rtrim($sql, ", ");
+        $sql .= ")";
+
+        $result = $conn->query($sql);
         $TableRows = array();
         // Process the result set
         while ($row = mysqli_fetch_assoc($result)) {
@@ -91,7 +117,8 @@ if (isset($_POST["Function"])) {
         }
         // Code for matching period and alternative staffs available
 
-        $query = "SELECT erp_faculty.f_id,erp_faculty.f_fname,erp_faculty.f_lname, erp_timetable.tt_day FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode INNER JOIN erp_faculty ON erp_subject.f_id=erp_faculty.f_id WHERE tt_day='Mon' AND tt_period NOT IN ($selectedPeriod) AND erp_subject.f_id NOT IN ('f002') AND erp_subject.cls_id IN (";
+
+        $query = "SELECT erp_subject.f_id, f_fname, f_lname, tt_day, tt_period FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode INNER JOIN erp_faculty ON erp_subject.f_id=erp_faculty.f_id WHERE tt_day='Mon' AND tt_period NOT IN ($selectedPeriod) AND erp_subject.f_id NOT IN ('$f_id') AND erp_subject.cls_id IN (";
         // $query = rtrim($query, ", "); // Remove the last comma and space
 
         // $query .= ")";
@@ -99,7 +126,7 @@ if (isset($_POST["Function"])) {
             $query .= "$classid, ";
         }
         $query = rtrim($query, ", ");
-        $query .= ")";
+        $query .= ") GROUP BY CONCAT(f_fname, ' ', f_lname)";
         // Execute the query and fetch the results
         $result = $conn->query($query);
 
@@ -118,7 +145,7 @@ if (isset($_POST["Function"])) {
             echo json_encode(array_merge($TableRows, $altPeriods));
             $TableRows = [];
         } else {
-            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+            echo "Error: " . $query . "<br>" . mysqli_error($conn);
         }
 
         // close database connection
