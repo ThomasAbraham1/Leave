@@ -158,8 +158,24 @@ if (isset($_GET["Menu"])) {
                                 <span class="item-name"> Manage Leave Approval </span>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $Menu == "ManageLeaveRequests" ? "active" : "" ?>"
+                                href="../Leave/ManageLeaveRequests.php?Menu=ManageLeaveRequests">
+                                <i class="icon">
+                                    <svg class="icon-10" xmlns="http://www.w3.org/2000/svg" width="10"
+                                        viewBox="0 0 24 24" fill="currentColor">
+                                        <g>
+                                            <circle cx="12" cy="12" r="8" fill="currentColor"></circle>
+                                        </g>
+                                    </svg>
+                                </i>
+                                <i class="sidenav-mini-icon"> </i>
+                                <span class="item-name"> Manage Leave Requests </span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
+                
                 <!-- <li class="nav-item">
                     <a class="nav-link" aria-current="page" href="../Gallery/UploadImages.php">
                         <i class="icon">
