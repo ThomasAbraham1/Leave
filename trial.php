@@ -4,7 +4,7 @@ include('Includes/db_connection.php');
 $subjects = [];
 $cse_classids = [];
 $todaySubjects = [];
-$sql = "SELECT f_id, tt_subcode FROM erp_subject WHERE f_id = 'f002'";
+$sql = "SELECT f_id, tt_subcode FROM erp_subject WHERE f_id = 'f005'";
 $result = $conn->query($sql);
 
 
@@ -86,7 +86,7 @@ foreach ($periods as $period) {
 //   $query .= "$period, ";
 // }
 
-$query = "SELECT * FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode INNER JOIN erp_faculty ON erp_subject.f_id=erp_faculty.f_id WHERE tt_day='Mon' AND tt_period NOT IN ($period) AND erp_subject.f_id NOT IN ('f002') AND erp_subject.cls_id IN (";
+$query = "SELECT * FROM erp_subject INNER JOIN erp_timetable ON erp_subject.tt_subcode = erp_timetable.tt_subcode INNER JOIN erp_faculty ON erp_subject.f_id=erp_faculty.f_id WHERE tt_day='Mon' AND tt_period NOT IN ($period) AND erp_subject.f_id NOT IN ('f005') AND erp_subject.cls_id IN (";
 // $query = rtrim($query, ", "); // Remove the last comma and space
 
 // $query .= ")";

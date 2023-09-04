@@ -93,13 +93,6 @@ if (isset($_POST["Function"])) {
         //     $sql .= "$period, ";
         // }
         // $sql = rtrim($sql, ", ");
-        $sql .= ") AND erp_timetable.cls_id IN (";
-
-        // For adding the class ids into the query
-        foreach ($cse_classids as $classid) {
-            $sql .= "$classid, ";
-        }
-        $sql = rtrim($sql, ", ");
         $sql .= ") AND erp_timetable.tt_subcode IN (";
         // For adding the subjects into query
         foreach ($todaySubjects as $todaySubject) {
@@ -155,6 +148,41 @@ if (isset($_POST["Function"])) {
     }
 
 
+    if ($_POST["Function"] == "leaveReqUpdation") {
+        $lvidValue = $_POST["lvidValue"];
+        $sql = "UPDATE `erp_leave_alt` SET `la_staffacpt` = '1' WHERE la_id = $lvidValue;";
+        if (mysqli_query($conn, $sql)) {
+            echo "OK";
+        } else {
+            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+        }
+
+        // close database connection
+        mysqli_close($conn);
+    }
+
+
+    if ($_POST["Function"] == "toHodBtnClick") {
+        $laIds = $_POST["laIds"]; 
+        $laIds = json_decode($laIds);
+        // Creating a tuple of the La Ids to be used in the query
+        $laIdsStringTuple = "(";
+        foreach ($laIds as $laId) {
+            $laIdsStringTuple .= "$laId," ;
+        }
+        $laIdsStringTuple = rtrim($laIdsStringTuple, ", ");
+        $laIdsStringTuple .= ")" ;
+        $sql = "UPDATE erp_leave_alt SET la_staffacpt = 2 WHERE la_id IN $laIdsStringTuple";
+        if (mysqli_query($conn, $sql)) {
+            echo "OK";
+        } else {
+            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+        }
+
+        // close database connection
+        mysqli_close($conn);
+    }
+    
 
 } else {
     echo "Function Parameter Not set";
