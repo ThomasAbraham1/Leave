@@ -219,6 +219,17 @@ $sql = "SELECT DISTINCT erp_timetable.tt_subcode, erp_class.cls_id,erp_timetable
         $sql .= ") AND erp_timetable.tt_period = $selectedPeriod";
 
 echo $sql;
+
+
+
+$sql = "SELECT * FROM erp_leave_alt WHERE cls_id";
+foreach($classIds as $classId){
+    $sql.="". $classId['cls_id'] . ", ";
+}
+$sql = rtrim($sql, ", ");
+$sql .= ")";
+echo $sql;
+
 ?>
 <script>
 $(document).ready(function(){

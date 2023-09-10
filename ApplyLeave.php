@@ -5,7 +5,7 @@ include("Includes/session_header.php");
 session_start();
 
 if(isset($_SESSION['login_data'])){
-
+    $erpFacultyRecords = $_SESSION['erpFacultyRecords'];
 include("Includes/Header.php") ?>
 
 

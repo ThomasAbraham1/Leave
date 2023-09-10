@@ -4,6 +4,7 @@ session_start();
 
 if (isset($_SESSION['login_data'])) {
     $log_id = $_SESSION['login_data'];
+    $erpFacultyRecords = $_SESSION['erpFacultyRecords'];
     include("Includes/Header.php");
     include('Includes/db_connection.php');
 
@@ -49,7 +50,7 @@ if (isset($_SESSION['login_data'])) {
             array_push($staffNames, $row);
         }
     }
-
+    
     // Finding requesting staff's class name
 
     $requestStaffClasses = [];
@@ -102,15 +103,16 @@ if (isset($_SESSION['login_data'])) {
                         <div class="card">
 
 
+
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table id="datatable" class="table table-striped" data-toggle="data-table">
                                         <thead>
                                             <tr>
+                                            <th>Requesting Staff</th>
                                                 <th>Alteration Date</th>
                                                 <th>Alteration Class</th>
                                                 <th>Alteration Hour</th>
-                                                <th>Requesting Staff</th>
                                                 <th>Approval</th>
                                             </tr>
                                         </thead>
@@ -143,10 +145,10 @@ if (isset($_SESSION['login_data'])) {
                                                 array_push($laIdsOfeqs, $alterationStaff['la_id']);
 
                                                 echo "<tr>
+                                                <td>$reqStaffName</td>
                                             <td>$alterationStaff[la_date]</td>
                                             <td>$reqStaffClass</td>
-                                            <td>$alterationStaff[la_hour]</td>
-                                            <td>$reqStaffName</td>";
+                                            <td>$alterationStaff[la_hour]</td>";
                                                 if ($staffAcceptStatus >= 1) {
                                                     echo "<td><input class='approvalCheckbox' type='checkbox' name='leave_approval' value='$alterationStaff[lv_id],$alterationStaff[la_hour],$alterationStaff[la_date]' disabled checked></td>
                                         </tr>";
@@ -160,7 +162,7 @@ if (isset($_SESSION['login_data'])) {
                                     </table>
                                     <div>
                                     <?php $alterationIdsJSON = json_encode($laIdsOfeqs); ?>
-                <button type="button" class="btn btn-primary reqHodBtn" value="<?php echo htmlspecialchars($alterationIdsJSON); ?>">Request HOD</button>
+                <!-- <button type="button" class="btn btn-primary reqHodBtn" value="">Request HOD</button> -->
                 <p></p>
                </div>
                                     <div id="staffAcceptAlert" class="m-3"></div>
@@ -182,33 +184,29 @@ if (isset($_SESSION['login_data'])) {
             <script>
 
                  $(document).ready(function () {
-                    var countOfRowsEqual2 = <?php echo $countOfRowsEqual2 ?>;
-                        var countOfReqRows = <?php echo $countOfReqRows ?>;
-                        console.log(countOfReqRows,countOfRowsEqual2);
                     // Function for controlling the send to HOD button
-                    function reqHodBtnController(){
-                    var chkBoxCount = $('.approvalCheckbox');
-                        var count = 0;
-                        for (let i = 0; i < chkBoxCount.length; i++) {
-                            var element = chkBoxCount[i];
-                            if(element.checked){
-                                count++;
-                            }
-                        }
-                        if(countOfRowsEqual2 == countOfReqRows){
-                            $('.reqHodBtn').prop('disabled', true);
-                            $('.reqHodBtn + p').html('Already sent to HOD');
+                    // function reqHodBtnController(){
+                    // var chkBoxCount = $('.approvalCheckbox');
+                    //     var count = 0;
+                    //     for (let i = 0; i < chkBoxCount.length; i++) {
+                    //         var element = chkBoxCount[i];
+                    //         if(element.checked){
+                    //             count++;
+                    //         }
+                    //     }
+                    //     if(countOfRowsEqual2 == countOfReqRows){
+                    //         $('.reqHodBtn').prop('disabled', true);
+                    //         $('.reqHodBtn + p').html('Already sent to HOD');
 
-                        }
-                        else if(count == chkBoxCount.length){
-                            $('.reqHodBtn').prop('disabled', false);
+                    //     }
+                    //     else if(count == chkBoxCount.length){
+                    //         $('.reqHodBtn').prop('disabled', false);
 
-                        } else{
-                            $('.reqHodBtn').prop('disabled', true);
-                        }
-                    }
-            
-                    reqHodBtnController(); // Checking if to enable the button when page loads first
+                    //     } else{
+                    //         $('.reqHodBtn').prop('disabled', true);
+                    //     }
+                    // }
+            // Checking if to enable the button when page loads first
 
                     // Function for when one of the checkboxes is clicked
                     $('.approvalCheckbox').on('click', function () {
@@ -243,39 +241,39 @@ if (isset($_SESSION['login_data'])) {
                         }else{
                             $(this).prop('checked', false) // In-case the user chooses to cancel confirmation for ticking checkbox  
                         }
-                        reqHodBtnController(); // Checking if button should be abled after onchange function
+                         // Checking if button should be abled after onchange function
                 });
 
             
                 // Function for when the HOD button is clicked
-                $('.reqHodBtn').on('click', function () {
-                    var laIds = $(this).val();
+                // $('.reqHodBtn').on('click', function () {
+                //     var laIds = $(this).val();
 
-                    // ajax for updating the staffacpt to '2' for all current requests user consented to submit
-                    $.ajax({
-                            url: 'Functions.php',
-                            type: 'POST',
-                            data: {laIds: laIds, Function: "toHodBtnClick" },
-                            success: function (response) {
-                            if (response == "OK") {
-                                    $("#staffAcceptAlert").html(`<div class="alert alert-success fade show" role="alert">Sent to HOD</div>`);
-                                    setTimeout(function () {
-                                        $("#staffAcceptAlert").html('');
-                                        location.reload();
-                                    }, 1000);
-                                } else {
-                                    $("#staffAcceptAlert").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
-                                setTimeout(function () {
-                                    $("#staffAcceptAlert").html('');
-                                    location.reload();
-                                }, 5000);
-                                }
-                            }
-                        });
+                //     // ajax for updating the staffacpt to '2' for all current requests user consented to submit
+                //     $.ajax({
+                //             url: 'Functions.php',
+                //             type: 'POST',
+                //             data: {laIds: laIds, Function: "toHodBtnClick" },
+                //             success: function (response) {
+                //             if (response == "OK") {
+                //                     $("#staffAcceptAlert").html(`<div class="alert alert-success fade show" role="alert">Sent to HOD</div>`);
+                //                     setTimeout(function () {
+                //                         $("#staffAcceptAlert").html('');
+                //                         location.reload();
+                //                     }, 1000);
+                //                 } else {
+                //                     $("#staffAcceptAlert").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
+                //                 setTimeout(function () {
+                //                     $("#staffAcceptAlert").html('');
+                //                     location.reload();
+                //                 }, 5000);
+                //                 }
+                //             }
+                //         });
 
                 
                 
-                });
+                // });
                 });
             </script>
 

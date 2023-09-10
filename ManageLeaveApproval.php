@@ -1,16 +1,33 @@
-<?php include("Includes/Header.php") ?>
+<?php
+
+
+session_start();
+
+if (isset($_SESSION['login_data'])) {
+    $log_id = $_SESSION['login_data'];
+    $classIds = $_SESSION['classIds'];
+    $erpFacultyRecords = $_SESSION['erpFacultyRecords'];
+    echo $log_id;
+    include("Includes/Header.php"); ?>
 
 
 <?php
 // Include the database connection file
 include('Includes/db_connection.php');
 //For the table
-$sql = "SELECT * FROM `erp_leave_alt` JOIN erp_faculty on erp_leave_alt.f_id=erp_faculty.f_id ";
+$sql = "SELECT * FROM erp_leave_alt WHERE cls_id IN (";
+foreach($classIds as $classId){
+    $sql.="". $classId['cls_id'] . ", ";
+}
+$sql = rtrim($sql, ", ");
+$sql .= ") ORDER BY la_date DESC";
+
 $result = mysqli_query($conn, $sql);
 $TableRows = array();
 while ($row = mysqli_fetch_assoc($result)) {
-
+    if($row['la_staffacpt'] == 1){
     array_push($TableRows, $row);
+    }
 }
 
 //for the staff dropdown
@@ -28,6 +45,17 @@ $EventRows1 = array();
 while ($row = mysqli_fetch_assoc($result)) {
     array_push($EventRows1, $row);
 }
+
+
+// leave table
+$sql = 'SELECT * FROM erp_leave';
+$result = mysqli_query($conn, $sql);
+$EventRows2 = array();
+while ($row = mysqli_fetch_assoc($result)) {
+    array_push($EventRows2, $row);
+}
+
+
 
 
 
@@ -88,6 +116,7 @@ mysqli_close($conn);
                         <table id="datatable" class="table table-striped" data-toggle="data-table">
                             <thead>
                                 <tr>
+                                    <th>Requesting Staff</th>
                                     <th>alteration date</th>
                                     <th>alteration hour</th>
                                     <th>alteration class</th>
@@ -95,7 +124,11 @@ mysqli_close($conn);
                                     <th>staff accept</th>
                                     <th>hod accept</th>
                                     <th>principal accept</th>
-                                    <th>principal Approval</th>
+                                    <?php if( $erpFacultyRecords[0]['f_role'] == 'HOD' ) { ?>
+                                    <th>HOD approval</th>
+                                    <?php }else{ ?>
+                                        <th>Principal approval</th>
+                                        <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -105,28 +138,57 @@ mysqli_close($conn);
                                     $hodaccept = $TableRow['la_hodacpt'] == 0 ? "false" : "true";
                                     $principalaccept = $TableRow['la_principalacpt'] == 0 ? "false" : "true";
                                     $staffName = "";
+                                    // Alteration staff Name
                                     foreach ($EventRows as $row) {
                                         if ($row['f_id'] == $TableRow['f_id'])
                                             $staffName = "$row[f_fname] $row[f_lname]";
                                     }
+                                    // Requesting staff id
+                                    $reqStaffId = "";
+                                    foreach ($EventRows2 as $row) {
+                                        if ($row['lv_id'] == $TableRow['lv_id'])
+                                            $reqStaffId = "$row[f_id]";
+                                    }
+                                    // Requesting staff name
+                                    $reqStaffName = "";
+                                    foreach ($EventRows as $row) {
+                                        if ($row['f_id'] == $reqStaffId)
+                                            $reqStaffName = "$row[f_fname] $row[f_lname]";
+                                    }
+
                                     $ClassName = "";
                                     foreach ($EventRows1 as $row) {
                                         if ($row['cls_id'] == $TableRow['cls_id'])
                                             $ClassName = "$row[cls_course]-$row[cls_deptname]-Sem-$row[cls_sem]";
                                     }
-                                    $PrincipalApproved=$TableRow['la_principalacpt']==0?"":"checked";
+                                   
                                     echo "<a href ='../Leave/ManageLeaveAlternatives.php'><tr>
+                                        <td>$reqStaffName</td>
                                         <td>$TableRow[la_date]</td>
                                         <td>$TableRow[la_hour]</td>
                                         <td>$ClassName</td>
                                         <td>$staffName</td>
                                         <td>$staffaccept</td>
                                         <td>$hodaccept</td>
-                                        <td>$principalaccept</td>
+                                        <td>$principalaccept</td>";
+                                        if( $erpFacultyRecords[0]['f_role'] == 'HOD' ) {
+                                            $Approved=$TableRow['la_hodacpt']==0?"":"checked";
+                                            if($erpFacultyRecords[0]['f_role'] == 'HOD'){
+                                                $erpFacultyRole = 'hod';
+                                            };
+                                            echo "
                                         <td> <div class='form-check form-switch'>
-                                        <input class='form-check-input' $PrincipalApproved type='checkbox' role='switch' id='$TableRow[la_id]'>
+                                        <input class='form-check-input' $Approved type='checkbox' role='switch' value='$erpFacultyRole' id='$TableRow[la_id]'>
                                       </div></td>
                                     </tr>";
+                                         } else{ 
+                                            $Approved=$TableRow['la_principalacpt']==0?"":"checked";
+                                        echo "
+                                        <td> <div class='form-check form-switch'>
+                                        <input class='form-check-input' $Approved type='checkbox' role='switch' value='' id='$TableRow[la_id]'>
+                                      </div></td>
+                                    </tr>";
+                                }
                                 }
                                 ?>
 
@@ -144,6 +206,8 @@ mysqli_close($conn);
     $(function () {
         $(".form-check-input").click(function (e) {
             var LeaveAlt=this.id;
+            var role = $(this).val();
+            console.log(role);
             var LeaveVal=0;
             var Approval="";
             if (this.checked) {LeaveVal=1; Approval="Approved";}
@@ -151,7 +215,7 @@ mysqli_close($conn);
                 $.ajax({
                     url: 'Functions.php',
                     type: 'POST',
-                    data: { LeaveAlt: LeaveAlt,LeaveVal:LeaveVal, Function: "ApproveLeaveAlt" },
+                    data: { role: role, LeaveAlt: LeaveAlt,LeaveVal:LeaveVal, Function: "ApproveLeaveAlt" },
                     success: function (response) {
                         console.log(response);
                         if (response == "OK") {
@@ -176,5 +240,8 @@ mysqli_close($conn);
     });
 </script>
 
-
-<?php include("Includes/Footer.php") ?>
+<?php
+} else {
+    header("Location:flogin.php");
+}
+include("Includes/Footer.php"); ?>

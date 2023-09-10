@@ -4,8 +4,13 @@ session_start();
 
 if(isset($_SESSION['login_data'])){
 
+
+$log_id = $_SESSION['login_data']; 
+$erpFacultyRecords = $_SESSION['erpFacultyRecords'];
 include("Includes/Header.php"); 
-$log_id = $_SESSION['login_data']; ?>
+?>
+
+
 
 
 <?php

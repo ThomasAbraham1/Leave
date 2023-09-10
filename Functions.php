@@ -58,8 +58,9 @@ if (isset($_POST["Function"])) {
         // execute SQL statement
         $LeaveAlt = $_POST["LeaveAlt"];
         $LeaveVal = $_POST["LeaveVal"];
+        $role = $_POST["role"];
 
-        $sql = "UPDATE `erp_leave_alt` SET `la_principalacpt` = '$LeaveVal' WHERE `erp_leave_alt`.`la_id` = $LeaveAlt;";
+        $sql = "UPDATE `erp_leave_alt` SET la_". $role . "acpt = '$LeaveVal' WHERE `erp_leave_alt`.`la_id` = $LeaveAlt;";
         if (mysqli_query($conn, $sql)) {
             echo "OK";
         } else {

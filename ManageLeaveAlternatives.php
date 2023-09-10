@@ -5,7 +5,8 @@ session_start();
 
 if (isset($_SESSION['login_data'])) {
     $log_id = $_SESSION['login_data'];
-    echo $log_id;
+    $erpFacultyRecords = $_SESSION['erpFacultyRecords'];
+    $classIds = $_SESSION['classIds'];
     include("Includes/Header.php") ?>
 
 
@@ -95,14 +96,18 @@ if (isset($_SESSION['login_data'])) {
     }
 
 
-    $sql = "SELECT DISTINCT cls_deptname, cls_id FROM erp_class WHERE cls_deptname ='Computer Science And Engineering' ";
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-        $i = 0;
-        while ($row = $result->fetch_assoc()) {
-            $cse_classids[$i] = $row['cls_id'];
-            $i++;
-        }
+    // $sql = "SELECT DISTINCT cls_deptname, cls_id FROM erp_class WHERE cls_deptname ='Computer Science And Engineering' ";
+    // $result = $conn->query($sql);
+    // if ($result->num_rows > 0) {
+    //     $i = 0;
+    //     while ($row = $result->fetch_assoc()) {
+    //         $cse_classids[$i] = $row['cls_id'];
+    //         $i++;
+    //     }
+    // }
+    // echo print_r($cse_classids);
+    foreach($classIds as $classId){
+        array_push($cse_classids, $classId['cls_id']);
     }
 
     foreach ($periods as $period) {
@@ -172,7 +177,7 @@ if (isset($_SESSION['login_data'])) {
     }
 
 
-    $sql = "SELECT erp_class.cls_id, cls_course, cls_dept, cls_sem FROM erp_class INNER JOIN erp_leave_alt ON erp_class.cls_id = erp_leave_alt.cls_id WHERE lv_id = 1";
+    $sql = "SELECT erp_class.cls_id, cls_course, cls_dept, cls_sem FROM erp_class INNER JOIN erp_leave_alt ON erp_class.cls_id = erp_leave_alt.cls_id WHERE lv_id = $LeaveId";
     $result = mysqli_query($conn, $sql);
     $EventRows2 = array();
 
@@ -182,7 +187,6 @@ if (isset($_SESSION['login_data'])) {
 
 
     $subjects = json_encode($periods);
-    echo $subjects;
     mysqli_close($conn);
     ?>
 
@@ -197,10 +201,12 @@ if (isset($_SESSION['login_data'])) {
             <div class="row">
                 <div class="col-md-12">
                     <div class="flex-wrap d-flex justify-content-between align-items-center">
+                    <?php echo print_r($cse_classids); ?>
                         <div>
                             <h1>Manage Leave Alternatives</h1>
                             <p>Here you can find all of your Leave Alternatives Details.</p>
                         </div>
+                        <?php echo print_r($classIds); ?>
                     </div>
                 </div>
             </div>
@@ -336,6 +342,7 @@ if (isset($_SESSION['login_data'])) {
                                             if ($row['cls_id'] == $TableRow['cls_id'])
                                                 $ClassName = "$row[cls_course]-$row[cls_dept]-Sem-$row[cls_sem]";
                                         }
+                                        echo $ClassName;
                                         echo "<a href ='../Leave/ManageLeaveAlternatives.php'><tr>
                                         <td>$TableRow[la_date]</td>
                                         <td>$TableRow[la_hour]</td>

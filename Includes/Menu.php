@@ -143,6 +143,7 @@ if (isset($_GET["Menu"])) {
                                 <span class="item-name"> Manage Leave </span>
                             </a>
                         </li>
+                        <?php if( $erpFacultyRecords[0]['f_role'] == 'HOD' ) { ?>
                         <li class="nav-item">
                             <a class="nav-link <?php echo $Menu == "ManageLeaveApproval" ? "active" : "" ?>"
                                 href="../Leave/ManageLeaveApproval.php?Menu=ManageLeaveApproval">
@@ -154,10 +155,12 @@ if (isset($_GET["Menu"])) {
                                         </g>
                                     </svg>
                                 </i>
+                                
                                 <i class="sidenav-mini-icon"> </i>
                                 <span class="item-name"> Manage Leave Approval </span>
                             </a>
                         </li>
+                        <?php } ?>
                         <li class="nav-item">
                             <a class="nav-link <?php echo $Menu == "ManageLeaveRequests" ? "active" : "" ?>"
                                 href="../Leave/ManageLeaveRequests.php?Menu=ManageLeaveRequests">
