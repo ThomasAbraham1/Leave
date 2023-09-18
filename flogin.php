@@ -26,7 +26,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
 
-
     if (mysqli_num_rows($login_result) == 1) {
         session_start();
         $_SESSION['login_data'] = $log_id;

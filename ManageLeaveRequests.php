@@ -2,13 +2,14 @@
 
 session_start();
 
-if (isset($_SESSION['login_data'])) {
+if (isset($_SESSION['login_data']) ) {
     $log_id = $_SESSION['login_data'];
     $erpFacultyRecords = $_SESSION['erpFacultyRecords'];
     include("Includes/Header.php");
     include('Includes/db_connection.php');
 
     // Finding requests from other staffs
+    if( $erpFacultyRecords[0]['f_role'] == 'HOD' OR $erpFacultyRecords[0]['f_role'] == 'Staff' OR $erpFacultyRecords[0]['f_role'] == 'Advisor' ){
     $alterationStaffs = [];
     $laIdsOfeqs = [];
     $sql = "SELECT * FROM erp_leave_alt WHERE f_id = '$log_id'";
@@ -16,20 +17,28 @@ if (isset($_SESSION['login_data'])) {
     if ($result->num_rows > 0) {
         while ($row = mysqli_fetch_assoc($result)) {
             array_push($alterationStaffs, $row);
-
         }
     }
     $alterationIdsJSON = json_encode($laIdsOfeqs);
-    $countOfReqRows = 0;
-    $countOfRowsEqual2 = 0;
-    foreach ($alterationStaffs as $alterationStaff) {
-        $countOfReqRows++;
-        if ($alterationStaff['la_staffacpt'] == "2") {
-            $countOfRowsEqual2++;
+    // $countOfReqRows = 0;
+    // $countOfRowsEqual2 = 0;
+    // foreach ($alterationStaffs as $alterationStaff) {
+    //     $countOfReqRows++;
+    //     if ($alterationStaff['la_staffacpt'] == "2") {
+    //         $countOfRowsEqual2++;
+    //     }
+    // }
+} else{
+    $alterationStaffs = [];
+    $laIdsOfeqs = [];
+    $sql = "SELECT * FROM erp_leave_alt";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            array_push($alterationStaffs, $row);
         }
     }
-
-
+}
     // Lv_id matches from erp_leave with erp_leave_alt
     $requestingStaffs = [];
     $sql = "SELECT * FROM erp_leave";
@@ -109,8 +118,8 @@ if (isset($_SESSION['login_data'])) {
                                     <table id="datatable" class="table table-striped" data-toggle="data-table">
                                         <thead>
                                             <tr>
+                                            <th>Alteration Date</th>
                                             <th>Requesting Staff</th>
-                                                <th>Alteration Date</th>
                                                 <th>Alteration Class</th>
                                                 <th>Alteration Hour</th>
                                                 <th>Approval</th>
@@ -145,8 +154,8 @@ if (isset($_SESSION['login_data'])) {
                                                 array_push($laIdsOfeqs, $alterationStaff['la_id']);
 
                                                 echo "<tr>
-                                                <td>$reqStaffName</td>
                                             <td>$alterationStaff[la_date]</td>
+                                            <td>$reqStaffName</td>
                                             <td>$reqStaffClass</td>
                                             <td>$alterationStaff[la_hour]</td>";
                                                 if ($staffAcceptStatus >= 1) {

@@ -201,12 +201,10 @@ if (isset($_SESSION['login_data'])) {
             <div class="row">
                 <div class="col-md-12">
                     <div class="flex-wrap d-flex justify-content-between align-items-center">
-                    <?php echo print_r($cse_classids); ?>
                         <div>
                             <h1>Manage Leave Alternatives</h1>
                             <p>Here you can find all of your Leave Alternatives Details.</p>
                         </div>
-                        <?php echo print_r($classIds); ?>
                     </div>
                 </div>
             </div>
@@ -342,7 +340,6 @@ if (isset($_SESSION['login_data'])) {
                                             if ($row['cls_id'] == $TableRow['cls_id'])
                                                 $ClassName = "$row[cls_course]-$row[cls_dept]-Sem-$row[cls_sem]";
                                         }
-                                        echo $ClassName;
                                         echo "<a href ='../Leave/ManageLeaveAlternatives.php'><tr>
                                         <td>$TableRow[la_date]</td>
                                         <td>$TableRow[la_hour]</td>

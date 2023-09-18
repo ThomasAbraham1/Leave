@@ -143,7 +143,7 @@ if (isset($_GET["Menu"])) {
                                 <span class="item-name"> Manage Leave </span>
                             </a>
                         </li>
-                        <?php if( $erpFacultyRecords[0]['f_role'] == 'HOD' ) { ?>
+                        <?php if( $erpFacultyRecords[0]['f_role'] == 'HOD' OR $erpFacultyRecords[0]['f_role'] == 'Principal' ) { ?>
                         <li class="nav-item">
                             <a class="nav-link <?php echo $Menu == "ManageLeaveApproval" ? "active" : "" ?>"
                                 href="../Leave/ManageLeaveApproval.php?Menu=ManageLeaveApproval">
