@@ -54,18 +54,28 @@ if (isset($_POST["Function"])) {
     }
 
 
-    if ($_POST["Function"] == "ApproveLeaveAlt") {
+    if ($_POST["Function"] == "ApproveLeaveId") {
         // execute SQL statement
-        $LeaveAlt = $_POST["LeaveAlt"];
+        $LeaveId = $_POST["LeaveId"];
         $LeaveVal = $_POST["LeaveVal"];
+        $Approval = $_POST["Approval"];
         $role = $_POST["role"];
-
-        $sql = "UPDATE `erp_leave_alt` SET la_". $role . "acpt = '$LeaveVal' WHERE `erp_leave_alt`.`la_id` = $LeaveAlt;";
+        if($Approval == 'Approved'){
+        $sql = "UPDATE `erp_leave_alt` SET la_". $role . "acpt = '$LeaveVal' WHERE `erp_leave_alt`.`lv_id` = $LeaveId;";
         if (mysqli_query($conn, $sql)) {
             echo "OK";
         } else {
             echo "Error: " . $sql . "<br>" . mysqli_error($conn);
         }
+
+    } else if($Approval == 'Denied'){
+        $sql = "DELETE FROM erp_leave_alt WHERE lv_id= $LeaveId";
+        if (mysqli_query($conn, $sql)) {
+            echo "OK";
+        } else {
+            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+        }
+    }
 
         // close database connection
         mysqli_close($conn);
@@ -162,6 +172,16 @@ if (isset($_POST["Function"])) {
         mysqli_close($conn);
     }
 
+    // Manage Leave Alternative Page's delete operation
+    if ($_POST["Function"] == "altRecordDeletion") {
+        $la_id = $_POST["la_id"];
+        $sql = "DELETE FROM `erp_leave_alt` WHERE la_id = $la_id";
+        if (mysqli_query($conn, $sql)) {
+            echo "OK";
+        } else {
+            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+        }
+    }
 
     if ($_POST["Function"] == "toHodBtnClick") {
         $laIds = $_POST["laIds"]; 

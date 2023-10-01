@@ -17,7 +17,7 @@ if (isset($_SESSION['login_data'])) {
     // Include the database connection file
     include('Includes/db_connection.php');
     //For the table
-    $sql = "SELECT erp_leave_alt.f_id, erp_leave_alt.la_date, erp_leave_alt.la_hour, la_principalacpt,la_hodacpt, la_staffacpt, erp_leave_alt.cls_id FROM `erp_leave_alt` JOIN erp_faculty on erp_leave_alt.f_id=erp_faculty.f_id WHERE erp_leave_alt.lv_id=" . $LeaveId . "";
+    $sql = "SELECT erp_leave_alt.f_id,erp_leave_alt.la_id, erp_leave_alt.la_date, erp_leave_alt.la_hour, la_principalacpt,la_hodacpt, la_staffacpt, erp_leave_alt.cls_id FROM `erp_leave_alt` JOIN erp_faculty on erp_leave_alt.f_id=erp_faculty.f_id WHERE erp_leave_alt.lv_id=" . $LeaveId . "";
     $result = mysqli_query($conn, $sql);
     $TableRows = array();
     while ($row = mysqli_fetch_assoc($result)) {
@@ -322,6 +322,7 @@ if (isset($_SESSION['login_data'])) {
                                         <th>staff accept</th>
                                         <th>hod accept</th>
                                         <th>principal accept</th>
+                                        <th>delete</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -348,12 +349,14 @@ if (isset($_SESSION['login_data'])) {
                                         <td>$staffaccept</td>
                                         <td>$hodaccept</td>
                                         <td>$principalaccept</td>
+                                        <td><input class='altRecordDelCheckBox' type='checkbox' name='leave_approval' value='$TableRow[la_id]'></td> 
                                     </tr>";
                                     }
                                     ?>
                                 </tbody>
                             </table>
                         </div>
+                        <div id="Result" class="m-3"></div>
                     </div>
                 </div>
             </div>
@@ -469,12 +472,12 @@ if (isset($_SESSION['login_data'])) {
                                 $("#Result").html('');
                                 $('#CreateLeaveAlternative').modal('hide');
                                 location.reload();
-                            }, 5000);
+                            }, 1000);
                         } else {
                             $("#Result").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
                             setTimeout(function () {
                                 $("#Result").html('');
-                            }, 5000);
+                            }, 1000);
 
                         }
 
@@ -483,8 +486,40 @@ if (isset($_SESSION['login_data'])) {
 
             });
         });
+// Ajax for deleting the alt records if a wrong alteration has been made
 
+        $(function(){
+            $(".altRecordDelCheckBox").click(function (e) {
+                if (confirm("Are you sure you want to consent?") == true) {
+                var la_id = $(this).val();
+                $.ajax({
+                    url: 'Functions.php',
+                    type: 'POST',
+                    data: { la_id: la_id , Function: "altRecordDeletion" },
+                    success: function (response) {
+                        console.log(response);
+                        if (response == "OK") {
+                            $("#Result").html(`<div class="alert alert-success fade show" role="alert"> Successfully Deleted Alterantive Record!</div>`);
+                            setTimeout(function () {
+                                $("#Result").html('');
+                                $('#CreateLeaveAlternative').modal('hide');
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            $("#Result").html(`<div class="alert alert-danger fade show" role="alert"> ${response}</div>`);
+                            setTimeout(function () {
+                                $("#Result").html('');
+                            }, 2000);
 
+                        }
+
+                    }
+                })
+            }else{
+                            $(this).prop('checked', false) // In-case the user chooses to cancel confirmation for ticking checkbox  
+                        }
+            });
+        });
     </script>
 
 <?php

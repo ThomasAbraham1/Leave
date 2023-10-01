@@ -16,7 +16,9 @@ if (isset($_SESSION['login_data']) ) {
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
         while ($row = mysqli_fetch_assoc($result)) {
+            if($row['la_hodacpt'] == 0){
             array_push($alterationStaffs, $row);
+        }
         }
     }
     $alterationIdsJSON = json_encode($laIdsOfeqs);
@@ -85,7 +87,7 @@ if (isset($_SESSION['login_data']) ) {
                             <div class="flex-wrap d-flex justify-content-between align-items-center">
                                 <div>
                                     <h1>Manage Leave Requests</h1>
-                                    <p>Here you can find all of your Leave Request Details.</p>
+                                    <p>Here you can find all of your Leave Request Details. The requests will stay until they're approved or denied by an HOD</p>
                                 </div>
                             </div>
                         </div>
@@ -224,7 +226,7 @@ if (isset($_SESSION['login_data']) ) {
                             $('.approvalCheckbox').on('change', function () {
                         var lvidValue = $(this).val();
                         lvidValue =JSON.stringify(lvidValue);
-                        console.log(lvidValue);
+                        console.log(lvidValue); 
                         // ajax code to send la_id value of the clicked checkbox to update erp_leave_alt
                         $.ajax({
                             url: 'Functions.php',
