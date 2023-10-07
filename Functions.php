@@ -1,4 +1,9 @@
 <?php
+//Import PHPMailer classes into the global namespace
+//These must be at the top of your script, not inside a function
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
 include('Includes/db_connection.php');
 if (isset($_POST["Function"])) {
 
@@ -60,22 +65,69 @@ if (isset($_POST["Function"])) {
         $LeaveVal = $_POST["LeaveVal"];
         $Approval = $_POST["Approval"];
         $role = $_POST["role"];
+        $altStaffEmail = $_POST["altStaffEmail"];
+        $approverEmail = $_POST["approverEmail"];
+        $okayMsg = '';
+
         if($Approval == 'Approved'){
         $sql = "UPDATE `erp_leave_alt` SET la_". $role . "acpt = '$LeaveVal' WHERE `erp_leave_alt`.`lv_id` = $LeaveId;";
         if (mysqli_query($conn, $sql)) {
-            echo "OK";
+            $okayMsg = 'OK';
         } else {
-            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+            $okayMsg .= "Error: " . $sql . "<br>" . mysqli_error($conn);
         }
 
     } else if($Approval == 'Denied'){
         $sql = "DELETE FROM erp_leave_alt WHERE lv_id= $LeaveId";
         if (mysqli_query($conn, $sql)) {
-            echo "OK";
+            $okayMsg = 'OK';
         } else {
-            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+            $okayMsg .= "Error: " . $sql . "<br>" . mysqli_error($conn);
         }
     }
+
+    
+    // Email Snippet Starts
+
+//Load Composer's autoloader
+require 'vendor/autoload.php';
+//Create an instance; passing `true` enables exceptions
+$mail = new PHPMailer(true);
+try {
+    //Server settings
+    $mail->isSMTP();                                            //Send using SMTP
+    $mail->Host       = 'smtp.gmail.com';                     //Set the SMTP server to send through
+    $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
+    $mail->Username   = 'cta102938@gmail.com';                     //SMTP username
+    $mail->Password   = 'btkovkokiqsiwyod';                               //SMTP password
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+    $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+    //Recipients
+    $mail->setFrom('cta102938@gmail.com', 'Grace LR Bot');
+    $mail->addAddress($altStaffEmail, 'Staff');     //Add a recipient
+    // $mail->addReplyTo('info@example.com', 'Information');
+    //Attachments
+    // $mail->addAttachment('/var/tmp/file.tar.gz');         //Add attachments
+    // $mail->addAttachment('/tmp/image.jpg', 'new.jpg');    //Optional name
+    //Content
+    $mail->isHTML(true);                                  //Set email format to HTML
+    $mail->Subject = 'Leave Request has been.' . $Approval . '.';
+    $mail->Body    = ' -';
+    $mail->AltBody = ' -';
+    $mail->send();
+    $emailResult = 'and a notification message has been sent';
+} catch (Exception $e) {
+    $emailResult = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+}
+
+    // Email snippet ends
+
+$responseArray = [];
+array_push($responseArray,$okayMsg);
+array_push($responseArray,$emailResult);
+$responseArray = json_encode($responseArray);
+
+echo $responseArray;
 
         // close database connection
         mysqli_close($conn);
